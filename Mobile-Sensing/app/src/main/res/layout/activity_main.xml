@@ -7,12 +7,51 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.129" />
+
+    <TextView
+        android:id="@+id/gps_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="@string/gps_label"
+        app:layout_constraintTop_toBottomOf="@+id/header"
+        tools:layout_editor_absoluteX="164dp" />
+
+    <TextView
+        android:id="@+id/acc_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="@string/acc_label"
+        app:layout_constraintTop_toBottomOf="@+id/gps_text"
+        tools:layout_editor_absoluteX="128dp" />
+
+    <TextView
+        android:id="@+id/gps_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="TextView"
+        app:layout_constraintTop_toBottomOf="@+id/gps_label"
+        tools:layout_editor_absoluteX="176dp" />
+
+    <TextView
+        android:id="@+id/acc_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="TextView"
+        app:layout_constraintTop_toBottomOf="@+id/acc_label"
+        tools:layout_editor_absoluteX="176dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

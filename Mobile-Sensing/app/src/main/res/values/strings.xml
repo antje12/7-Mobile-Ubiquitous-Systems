@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Mobile-Sensing</string>
+    <string name="gps_label">You are here:</string>
+    <string name="acc_label">You are moving this way:</string>
 </resources>

@@ -5,16 +5,15 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.Task
-
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,17 +21,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
 
+    private lateinit var gps_text: TextView
+    private lateinit var acc_text: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var accListener = AccelerometerListener();
+        gps_text = findViewById(R.id.gps_text)
+        acc_text = findViewById(R.id.acc_text)
 
-        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        sensorManager.registerListener(accListener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        handlePermissions()
+        handleGPS()
+        handleAccelerometer()
+    }
 
-        val locationPermissionRequest = registerForActivityResult(
+    private fun handlePermissions() {
+        val permissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
             when {
@@ -48,86 +53,77 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // ...
-
         // Before you perform the actual permission request, check whether your app
         // already has the permissions, and whether your app needs to show a permission
         // rationale dialog. For more details, see Request permissions.
-        locationPermissionRequest.launch(
+        permissionRequest.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
+    }
 
+    private fun handleGPS() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        locationRequest = LocationRequest.create()?.apply {
-            interval = 10000
-            fastestInterval = 5000
+        locationRequest = LocationRequest.create().apply {
+            interval = TimeUnit.SECONDS.toMillis(10)
+            fastestInterval = TimeUnit.SECONDS.toMillis(5)
+            maxWaitTime = TimeUnit.MINUTES.toMillis(1)
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                locationResult ?: return
-                for (location in locationResult.locations){
-                    // Update UI with location data
-                    Log.i("MAIN", "Location 1: " + location?.toString())
-                }
+                super.onLocationResult(locationResult)
+                var coords = "" + locationResult.lastLocation?.latitude + " : " + locationResult.lastLocation?.longitude
+                Log.i("MAIN", "Location: " + coords)
+                gps_text.text = coords
             }
         }
+    }
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.i("MAIN", "Good Permissions")
+    private fun handleAccelerometer() {
+        var accListener = AccelerometerListener()
 
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    // Got last known location. In some rare situations this can be null.
-                    Log.i("MAIN", "Location 2: " + location?.toString())
-                }
-        }
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensorManager.registerListener(accListener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onResume() {
         super.onResume()
-        if (/*requestingLocationUpdates*/ true) startLocationUpdates()
+        startLocationUpdates()
     }
 
     private fun startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.i("MAIN", "Good Permissions 2")
-
-            fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback,
-                Looper.getMainLooper())
+        if (hasLocationPermissions()) {
+            try {
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+            } catch (unlikely: SecurityException) {
+                Log.e("MAIN", "Lost location permissions $unlikely")
+            }
         }
+    }
+
+    private fun hasLocationPermissions(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onPause() {
         super.onPause()
-        stopLocationUpdates()
-    }
-
-    private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 }

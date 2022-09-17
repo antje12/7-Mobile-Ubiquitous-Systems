@@ -27,10 +27,9 @@ class AccelerometerListener : SensorEventListener {
                 last_y = y
                 last_z = z
 
-                Log.i("ACCELEROMETER", "XYZ = "
-                        + "%.2f".format(x) + " | "
-                        + "%.2f".format(y) + " | "
-                        + "%.2f".format(z))
+                var move = "XYZ = " + "%.2f".format(x) + " | " + "%.2f".format(y) + " | " + "%.2f".format(z)
+                Log.i("ACCELEROMETER", move)
+
             }
         }
     }
