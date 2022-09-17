@@ -4,13 +4,16 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.util.Log
+import android.widget.TextView
 
-class AccelerometerListener : SensorEventListener {
+class AccelerometerListener(acc_text: TextView) : SensorEventListener {
 
     private var lastUpdate: Long = 0
     private var last_x: Float = 0f
-    private  var last_y: Float = 0f
-    private  var last_z: Float = 0f
+    private var last_y: Float = 0f
+    private var last_z: Float = 0f
+
+    private var acc_text: TextView = acc_text
 
     override fun onSensorChanged(event: SensorEvent) {
         val mySensor: Sensor = event.sensor
@@ -27,9 +30,10 @@ class AccelerometerListener : SensorEventListener {
                 last_y = y
                 last_z = z
 
-                var move = "XYZ = " + "%.2f".format(x) + " | " + "%.2f".format(y) + " | " + "%.2f".format(z)
+                var move =
+                    "XYZ = " + "%.2f".format(x) + " | " + "%.2f".format(y) + " | " + "%.2f".format(z)
                 Log.i("ACCELEROMETER", move)
-
+                acc_text.text = move
             }
         }
     }

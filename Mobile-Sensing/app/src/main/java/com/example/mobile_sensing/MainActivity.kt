@@ -77,7 +77,8 @@ class MainActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-                var coords = "" + locationResult.lastLocation?.latitude + " : " + locationResult.lastLocation?.longitude
+                var coords =
+                    "" + locationResult.lastLocation?.latitude + " : " + locationResult.lastLocation?.longitude
                 Log.i("MAIN", "Location: " + coords)
                 gps_text.text = coords
             }
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleAccelerometer() {
-        var accListener = AccelerometerListener()
+        var accListener = AccelerometerListener(acc_text)
 
         val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
